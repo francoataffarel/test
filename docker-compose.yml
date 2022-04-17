@@ -1,0 +1,27 @@
+version: '3'
+services:
+  scrapyd_1:
+    build: scrapyd
+    environment:
+      USERNAME: "samkeet"
+      PASSWORD: "samkeet"
+    ports:
+      - "6800:6800"
+  scrapyd_2:
+    build: scrapyd
+    environment:
+      USERNAME: "samkeet"
+      PASSWORD: "samkeet"
+    ports:
+      - "6801:6800"
+  scrapydweb:
+    build: scrapydweb
+    ports:
+      - "5000:5000"
+    environment:
+      USERNAME: "samkeet"
+      PASSWORD: "samkeet"
+      SCRAPYD_SERVERS: "samkeet:samkeet@scrapyd_1:6800,samkeet:samkeet@scrapyd_2:6801"
+    depends_on:
+      - scrapyd_1
+      - scrapyd_2

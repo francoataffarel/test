@@ -1,0 +1,11 @@
+scrapy
+python-decouple
+pandas
+boto3
+scrapyd==1.2.1
+scrapyrt==v0.12
+Pillow==8.2.0
+requests
+scrapy-fake-useragent
+PyYAML==5.3.1
+selenium

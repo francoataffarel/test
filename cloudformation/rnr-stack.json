@@ -1,0 +1,1911 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Parameters": {
+        "Env": {
+            "AllowedValues": [
+                "dev",
+                "stage",
+                "prod"
+            ],
+            "Default": "dev",
+            "Description": "Please select a Environment",
+            "Type": "String"
+        },
+        "Username": {
+            "Type": "String",
+            "Description": "Please enter your username",
+            "AllowedPattern": "^[a-z]+$"
+        },
+        "SubcategoryStackName": {
+            "Description": "Name of an active Subcategory stack that contains the subcategory resources, such as the glue DBs and tables, that will be used in this stack.",
+            "Type": "String",
+            "MinLength": 1,
+            "MaxLength": 255,
+            "AllowedPattern": "^[a-zA-Z][-a-zA-Z0-9]*$"
+        }
+    },
+    "Resources": {
+        "RawProductDetailsBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "BucketName": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "rnr",
+                            "rawproductdetails",
+                            {
+                                "Fn::If": [
+                                    "IsDev",
+                                    {
+                                        "Fn::Join": [
+                                            "-",
+                                            [
+                                                {
+                                                    "Ref": "Env"
+                                                },
+                                                {
+                                                    "Ref": "Username"
+                                                }
+                                            ]
+                                        ]
+                                    },
+                                    {
+                                        "Ref": "Env"
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                },
+                "Tags": [
+                    {
+                        "Key": "Project",
+                        "Value": "Mensa RnR"
+                    },
+                    {
+                        "Key": "Env",
+                        "Value": {
+                            "Ref": "Env"
+                        }
+                    },
+                    {
+                        "Key": "Owner",
+                        "Value": {
+                            "Ref": "Username"
+                        }
+                    }
+                ],
+                "AccessControl": "BucketOwnerFullControl",
+                "PublicAccessBlockConfiguration": {
+                    "BlockPublicAcls": true,
+                    "BlockPublicPolicy": true,
+                    "IgnorePublicAcls": true,
+                    "RestrictPublicBuckets": true
+                }
+            }
+        },
+        "RawProductReviewsBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "BucketName": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "rnr",
+                            "rawproductreviews",
+                            {
+                                "Fn::If": [
+                                    "IsDev",
+                                    {
+                                        "Fn::Join": [
+                                            "-",
+                                            [
+                                                {
+                                                    "Ref": "Env"
+                                                },
+                                                {
+                                                    "Ref": "Username"
+                                                }
+                                            ]
+                                        ]
+                                    },
+                                    {
+                                        "Ref": "Env"
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                },
+                "Tags": [
+                    {
+                        "Key": "Project",
+                        "Value": "Mensa RnR"
+                    },
+                    {
+                        "Key": "Env",
+                        "Value": {
+                            "Ref": "Env"
+                        }
+                    },
+                    {
+                        "Key": "Owner",
+                        "Value": {
+                            "Ref": "Username"
+                        }
+                    }
+                ],
+                "AccessControl": "BucketOwnerFullControl",
+                "PublicAccessBlockConfiguration": {
+                    "BlockPublicAcls": true,
+                    "BlockPublicPolicy": true,
+                    "IgnorePublicAcls": true,
+                    "RestrictPublicBuckets": true
+                }
+            }
+        },
+        "RawProductDetailsDB": {
+            "Type": "AWS::Glue::Database",
+            "Properties": {
+                "DatabaseInput": {
+                    "Name": {
+                        "Fn::Join": [
+                            "-",
+                            [
+                                "rnr",
+                                "rawproductdetailsdb",
+                                {
+                                    "Fn::If": [
+                                        "IsDev",
+                                        {
+                                            "Fn::Join": [
+                                                "-",
+                                                [
+                                                    {
+                                                        "Ref": "Env"
+                                                    },
+                                                    {
+                                                        "Ref": "Username"
+                                                    }
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Ref": "Env"
+                                        }
+                                    ]
+                                }
+                            ]
+                        ]
+                    },
+                    "Description": "Glue database to store tables after crawling RawProductDetails Bucket"
+                },
+                "CatalogId": {
+                    "Ref": "AWS::AccountId"
+                }
+            }
+        },
+        "ReviewStagingDB": {
+            "Type": "AWS::Glue::Database",
+            "Properties": {
+                "DatabaseInput": {
+                    "Name": {
+                        "Fn::Join": [
+                            "-",
+                            [
+                                "rnr",
+                                "reviewstagingdb",
+                                {
+                                    "Fn::If": [
+                                        "IsDev",
+                                        {
+                                            "Fn::Join": [
+                                                "-",
+                                                [
+                                                    {
+                                                        "Ref": "Env"
+                                                    },
+                                                    {
+                                                        "Ref": "Username"
+                                                    }
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Ref": "Env"
+                                        }
+                                    ]
+                                }
+                            ]
+                        ]
+                    },
+                    "Description": "Glue database to store tables after crawling Clean Data Bucket"
+                },
+                "CatalogId": {
+                    "Ref": "AWS::AccountId"
+                }
+            }
+        },
+        "ReviewStagingCrawler": {
+            "Type": "AWS::Glue::Crawler",
+            "Properties": {
+                "Name": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "rnr",
+                            "reviewstagingcrawler",
+                            {
+                                "Fn::If": [
+                                    "IsDev",
+                                    {
+                                        "Fn::Join": [
+                                            "-",
+                                            [
+                                                {
+                                                    "Ref": "Env"
+                                                },
+                                                {
+                                                    "Ref": "Username"
+                                                }
+                                            ]
+                                        ]
+                                    },
+                                    {
+                                        "Ref": "Env"
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                },
+                "Role": {
+                    "Fn::GetAtt": [
+                        "GlueRole",
+                        "Arn"
+                    ]
+                },
+                "Description": "Glue Crawler to crawl Clean Data Bucket",
+                "DatabaseName": {
+                    "Ref": "ReviewStagingDB"
+                },
+                "Tags": {
+                    "Project": "Mensa RnR",
+                    "Env": {
+                        "Ref": "Env"
+                    },
+                    "Owner": {
+                        "Ref": "Username"
+                    }
+                },
+                "SchemaChangePolicy": {
+                    "UpdateBehavior": "UPDATE_IN_DATABASE",
+                    "DeleteBehavior": "LOG"
+                },
+                "Configuration": "{\"Version\":1.0,\"CrawlerOutput\":{\"Partitions\":{\"AddOrUpdateBehavior\":\"InheritFromTable\"},\"Tables\":{\"AddOrUpdateBehavior\":\"MergeNewColumns\"}}}",
+                "Targets": {
+                    "JdbcTargets": [
+                        {
+                            "ConnectionName": {
+                                "Fn::If": [ "IsProd", "rnr_prod", "rnr_dev" ]
+                            },
+                            "Path": {
+                                "Fn::Join": [
+                                    "/",
+                                    [
+                                        {"Fn::If": [ "IsProd", "rnr_prod", "rnr_dev" ]},
+                                        "review_and_rating",
+                                        "review_staging"
+                                    ]
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "RawProductDetailsTable": {
+            "Type": "AWS::Glue::Table",
+            "DependsOn": "RawProductDetailsDB",
+            "Properties": {
+                "TableInput": {
+                    "Name": {
+                        "Fn::Join": [
+                            "-",
+                            [
+                                "rnr",
+                                "rawproductdetailstable",
+                                {
+                                    "Fn::If": [
+                                        "IsDev",
+                                        {
+                                            "Fn::Join": [
+                                                "-",
+                                                [
+                                                    {
+                                                        "Ref": "Env"
+                                                    },
+                                                    {
+                                                        "Ref": "Username"
+                                                    }
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Ref": "Env"
+                                        }
+                                    ]
+                                }
+                            ]
+                        ]
+                    },
+                    "Retention": 0,
+                    "Description": "Glue Table which hold schema for RNR raw data files",
+                    "TableType": "EXTERNAL_TABLE",
+                    "Parameters": {
+                        "CrawlerSchemaSerializerVersion": "1.0",
+                        "CrawlerSchemaDeserializerVersion": "1.0",
+                        "compressionType": "none",
+                        "classification": "json",
+                        "typeOfData": "file"
+                    },
+                    "StorageDescriptor": {
+                        "Columns": [
+                            {
+                                "Name": "sub_categories",
+                                "Type": "string",
+                                "Comment": ""
+                            },
+                            {
+                                "Name": "products-href",
+                                "Type": "string",
+                                "Comment": ""
+                            },
+                            {
+                                "Name": "product_name",
+                                "Type": "string",
+                                "Comment": ""
+                            },
+                            {
+                                "Name": "mrp",
+                                "Type": "string",
+                                "Comment": ""
+                            },
+                            {
+                                "Name": "price",
+                                "Type": "string",
+                                "Comment": ""
+                            },
+                            {
+                                "Name": "product_details",
+                                "Type": "string",
+                                "Comment": ""
+                            },
+                            {
+                                "Name": "rating_count",
+                                "Type": "string",
+                                "Comment": ""
+                            },
+                            {
+                                "Name": "rating",
+                                "Type": "string",
+                                "Comment": ""
+                            },
+                            {
+                                "Name": "rating_star",
+                                "Type": "string",
+                                "Comment": ""
+                            },
+                            {
+                                "Name": "rating_aspect",
+                                "Type": "string",
+                                "Comment": ""
+                            },
+                            {
+                                "Name": "brand",
+                                "Type": "string",
+                                "Comment": ""
+                            },
+                            {
+                                "Name": "product_category",
+                                "Type": "string",
+                                "Comment": ""
+                            },
+                            {
+                                "Name": "extracted_date",
+                                "Type": "string",
+                                "Comment": ""
+                            },
+                            {
+                                "Name": "skuid",
+                                "Type": "string",
+                                "Comment": ""
+                            }
+                        ],
+                        "Location": {
+                            "Fn::Sub": "s3://${RawProductDetailsBucket}"
+                        },
+                        "InputFormat": "org.apache.hadoop.mapred.TextInputFormat",
+                        "OutputFormat": "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat",
+                        "Compressed": "false",
+                        "NumberOfBuckets": "-1",
+                        "SerdeInfo": {
+                            "SerializationLibrary": "org.openx.data.jsonserde.JsonSerDe",
+                            "Parameters": {
+                                "paths": "brand,by-feature-ratings,categories,categories-href,extracted_date,mrp,overall-ratings,product_details,product-name,product_category,products-list,products-list-href,ratings-link,ratings-link-href,selling-price-excl-gst,selling-price-incl-gst,skuid,star-ratings,web-scraper-order,web-scraper-start-url"
+                            }
+                        },
+                        "Parameters": {
+                            "CrawlerSchemaSerializerVersion": "1.0",
+                            "CrawlerSchemaDeserializerVersion": "1.0",
+                            "compressionType": "none",
+                            "classification": "json",
+                            "typeOfData": "file"
+                        },
+                        "StoredAsSubDirectories": "false"
+                    }
+                },
+                "DatabaseName": {
+                    "Ref": "RawProductDetailsDB"
+                },
+                "CatalogId": {
+                    "Ref": "AWS::AccountId"
+                }
+            }
+        },
+        "RawProductReviewsTable": {
+            "Type": "AWS::Glue::Table",
+            "DependsOn": "RawProductDetailsDB",
+            "Properties": {
+                "TableInput": {
+                    "Name": {
+                        "Fn::Join": [
+                            "-",
+                            [
+                                "rnr",
+                                "rawproductreviewstable",
+                                {
+                                    "Fn::If": [
+                                        "IsDev",
+                                        {
+                                            "Fn::Join": [
+                                                "-",
+                                                [
+                                                    {
+                                                        "Ref": "Env"
+                                                    },
+                                                    {
+                                                        "Ref": "Username"
+                                                    }
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Ref": "Env"
+                                        }
+                                    ]
+                                }
+                            ]
+                        ]
+                    },
+                    "Retention": 0,
+                    "Description": "Glue Table which hold schema for RNR raw data for product review files",
+                    "TableType": "EXTERNAL_TABLE",
+                    "Parameters": {
+                        "CrawlerSchemaSerializerVersion": "1.0",
+                        "CrawlerSchemaDeserializerVersion": "1.0",
+                        "compressionType": "none",
+                        "classification": "json",
+                        "typeOfData": "file"
+                    },
+                    "StorageDescriptor": {
+                        "Columns": [
+                            {
+                                "Name": "skuid",
+                                "Type": "string",
+                                "Comment": ""
+                            },
+                            {
+                                "Name": "review_title",
+                                "Type": "string",
+                                "Comment": ""
+                            },
+                            {
+                                "Name": "review_star",
+                                "Type": "string",
+                                "Comment": ""
+                            },
+                            {
+                                "Name": "review_text",
+                                "Type": "string",
+                                "Comment": ""
+                            },
+                            {
+                                "Name": "brand",
+                                "Type": "string",
+                                "Comment": ""
+                            },
+                            {
+                                "Name": "product_category",
+                                "Type": "string",
+                                "Comment": ""
+                            },
+                            {
+                                "Name": "review_date",
+                                "Type": "string",
+                                "Comment": ""
+                            },
+                            {
+                                "Name": "review_verified",
+                                "Type": "string",
+                                "Comment": ""
+                            },
+                            {
+                                "Name": "review_upvotes",
+                                "Type": "string",
+                                "Comment": ""
+                            },
+                            {
+                                "Name": "review_author",
+                                "Type": "string",
+                                "Comment": ""
+                            },
+                            {
+                                "Name": "review_attributes",
+                                "Type": "string",
+                                "Comment": ""
+                            },
+                            {
+                                "Name": "extracted_date",
+                                "Type": "string",
+                                "Comment": ""
+                            }
+                        ],
+                        "Location": {
+                            "Fn::Sub": "s3://${RawProductReviewsBucket}"
+                        },
+                        "InputFormat": "org.apache.hadoop.mapred.TextInputFormat",
+                        "OutputFormat": "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat",
+                        "Compressed": "false",
+                        "NumberOfBuckets": "-1",
+                        "SerdeInfo": {
+                            "SerializationLibrary": "org.openx.data.jsonserde.JsonSerDe",
+                            "Parameters": {
+                                "paths": "skuid,brand,extracted_date,product_name,products,products-href,review_attributes,review_author,review_count,review_date,review_location,review_pagenumber,review_skuid,review_star,review_text,review_title,review_upvotes,review_verified,see all reviews,see all reviews-href,sub_categories,sub_categories-href,web-scraper-order,web-scraper-start-url"
+                            }
+                        },
+                        "Parameters": {
+                            "CrawlerSchemaSerializerVersion": "1.0",
+                            "CrawlerSchemaDeserializerVersion": "1.0",
+                            "compressionType": "none",
+                            "classification": "json",
+                            "typeOfData": "file"
+                        },
+                        "StoredAsSubDirectories": "false"
+                    }
+                },
+                "DatabaseName": {
+                    "Ref": "RawProductDetailsDB"
+                },
+                "CatalogId": {
+                    "Ref": "AWS::AccountId"
+                }
+            }
+        },
+        "GlueRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "glue.amazonaws.com",
+                                    "redshift.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "Path": "/",
+                "RoleName": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "rnr",
+                            "gluerole",
+                            {
+                                "Fn::If": [
+                                    "IsDev",
+                                    {
+                                        "Fn::Join": [
+                                            "-",
+                                            [
+                                                {
+                                                    "Ref": "Env"
+                                                },
+                                                {
+                                                    "Ref": "Username"
+                                                }
+                                            ]
+                                        ]
+                                    },
+                                    {
+                                        "Ref": "Env"
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                },
+                "Policies": [
+                    {
+                        "PolicyName": {
+                            "Fn::Join": [
+                                "-",
+                                [
+                                    "rnr",
+                                    "glueservicerole",
+                                    {
+                                        "Fn::If": [
+                                            "IsDev",
+                                            {
+                                                "Fn::Join": [
+                                                    "-",
+                                                    [
+                                                        {
+                                                            "Ref": "Env"
+                                                        },
+                                                        {
+                                                            "Ref": "Username"
+                                                        }
+                                                    ]
+                                                ]
+                                            },
+                                            {
+                                                "Ref": "Env"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            ]
+                        },
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Sid": "cloudWatchWriteAccess",
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "cloudwatch:PutMetricData"
+                                    ],
+                                    "Resource": [
+                                        "*"
+                                    ]
+                                },
+                                {
+                                    "Sid": "ec2Access",
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "ec2:DescribeVpcEndpoints",
+                                        "ec2:DescribeRouteTables",
+                                        "ec2:CreateNetworkInterface",
+                                        "ec2:DeleteNetworkInterface",
+                                        "ec2:DescribeNetworkInterfaces",
+                                        "ec2:DescribeSecurityGroups",
+                                        "ec2:DescribeSubnets",
+                                        "ec2:DescribeVpcAttribute"
+                                    ],
+                                    "Resource": [
+                                        "*"
+                                    ]
+                                },
+                                {
+                                    "Sid": "glueFullAcess",
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "glue:*"
+                                    ],
+                                    "Resource": [
+                                        "*"
+                                    ]
+                                },
+                                {
+                                    "Sid": "iamReadFullAccess",
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "iam:ListRolePolicies",
+                                        "iam:GetRole",
+                                        "iam:GetRolePolicy"
+                                    ],
+                                    "Resource": [
+                                        "*"
+                                    ]
+                                },
+                                {
+                                    "Sid": "redshiftFullAccess",
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "redshift:*"
+                                    ],
+                                    "Resource": [
+                                        "*"
+                                    ]
+                                },
+                                {
+                                    "Sid": "logsReadWriteAccess",
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "logs:CreateLogGroup",
+                                        "logs:CreateLogStream",
+                                        "logs:PutLogEvents"
+                                    ],
+                                    "Resource": [
+                                        "arn:aws:logs:*:*:/aws-glue/*"
+                                    ]
+                                },
+                                {
+                                    "Sid": "s3ReadAccess",
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "s3:GetBucketLocation",
+                                        "s3:ListBucket",
+                                        "s3:ListAllMyBuckets",
+                                        "s3:GetBucketAcl"
+                                    ],
+                                    "Resource": [
+                                        "*"
+                                    ]
+                                },
+                                {
+                                    "Sid": "s3CreateBucketAccess",
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "s3:CreateBucket"
+                                    ],
+                                    "Resource": [
+                                        "arn:aws:s3:::aws-glue-*"
+                                    ]
+                                },
+                                {
+                                    "Sid": "s3ReadWriteAccess",
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "s3:GetObject",
+                                        "s3:PutObject",
+                                        "s3:DeleteObject"
+                                    ],
+                                    "Resource": [
+                                        "arn:aws:s3:::crawler-public*",
+                                        "arn:aws:s3:::aws-glue-*/*",
+                                        "arn:aws:s3:::*/*aws-glue-*/*"
+                                    ]
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "ec2:CreateTags",
+                                        "ec2:DeleteTags"
+                                    ],
+                                    "Condition": {
+                                        "ForAllValues:StringEquals": {
+                                            "aws:TagKeys": [
+                                                "aws-glue-service-resource"
+                                            ]
+                                        }
+                                    },
+                                    "Resource": [
+                                        "arn:aws:ec2:*:*:network-interface/*",
+                                        "arn:aws:ec2:*:*:security-group/*",
+                                        "arn:aws:ec2:*:*:instance/*"
+                                    ]
+                                },
+                                {
+                                    "Sid": "AllowGlueToPutEvents",
+                                    "Effect": "Allow",
+                                    "Action": "events:PutEvents",
+                                    "Resource": "*"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "PolicyName": {
+                            "Fn::Join": [
+                                "-",
+                                [
+                                    "rnr",
+                                    "s3bucketrole",
+                                    {
+                                        "Fn::If": [
+                                            "IsDev",
+                                            {
+                                                "Fn::Join": [
+                                                    "-",
+                                                    [
+                                                        {
+                                                            "Ref": "Env"
+                                                        },
+                                                        {
+                                                            "Ref": "Username"
+                                                        }
+                                                    ]
+                                                ]
+                                            },
+                                            {
+                                                "Ref": "Env"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            ]
+                        },
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": "s3:*",
+                                    "Resource": [
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    {
+                                                        "Fn::GetAtt": [
+                                                            "RawProductDetailsBucket",
+                                                            "Arn"
+                                                        ]
+                                                    },
+                                                    "/*"
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    {
+                                                        "Fn::GetAtt": [
+                                                            "RawProductReviewsBucket",
+                                                            "Arn"
+                                                        ]
+                                                    },
+                                                    "/*"
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::ImportValue": {
+                                                "Fn::Sub": "${SubcategoryStackName}-MappingBucketArn"
+                                            }
+                                        },
+                                        "arn:aws:s3:::mensa-github-sync/*"
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Project",
+                        "Value": "Mensa RnR"
+                    },
+                    {
+                        "Key": "Env",
+                        "Value": {
+                            "Ref": "Env"
+                        }
+                    },
+                    {
+                        "Key": "Owner",
+                        "Value": {
+                            "Ref": "Username"
+                        }
+                    }
+                ]
+            }
+        },
+        "ProductDetailsGlueJob": {
+            "Type": "AWS::Glue::Job",
+            "Properties": {
+                "Role": {
+                    "Ref": "GlueRole"
+                },
+                "Description": "ETL Job to clean data from RawProductDetailsBucket to write it back to Redshift",
+                "GlueVersion": "2.0",
+                "Connections": {
+                    "Connections" : [
+                        {
+                            "Fn::If": [
+                                "IsProd",
+                                "rnr_prod",
+                                "rnr_dev"
+                            ]
+                        }
+                    ]
+                },
+                "Command": {
+                    "Name": "glueetl",
+                    "ScriptLocation": {
+                        "Fn::If": [
+                            "IsProd",
+                            "s3://mensa-github-sync/brand-analytics/glue-scripts/product_details.py",
+                            "s3://mensa-github-sync/brand-analytics-dev/glue-scripts/product_details.py"
+                        ]
+                    }
+                },
+                "DefaultArguments": {
+                    "--job-bookmark-option": "job-bookmark-enable",
+                    "--enable-metrics": "",
+                    "--enable-continuous-cloudwatch-log": "true",
+                    "--enable-continuous-log-filter": "true",
+                    "--TempDir": "s3://aws-glue-temporary-092621740321-ap-south-1",
+                    "--GLUE_DB": {
+                        "Ref": "RawProductDetailsDB"
+                    },
+                    "--GLUE_TABLE": {
+                        "Ref": "RawProductDetailsTable"
+                    },
+                    "--PRODUCT_GLUE_TABLE": {
+                        "Fn::ImportValue": {
+                            "Fn::Sub": "${SubcategoryStackName}-SkuMappingTable"
+                        }
+                    },
+                    "--CATEGORY_GLUE_TABLE": {
+                        "Fn::ImportValue": {
+                            "Fn::Sub": "${SubcategoryStackName}-CategoryMappingTable"
+                        }
+                    },
+                    "--MAPPING_GLUE_DB": {
+                        "Fn::ImportValue": {
+                            "Fn::Sub": "${SubcategoryStackName}-MappingDB"
+                        }
+                    },
+                    "--ROLE_ARN": {
+                        "Fn::GetAtt": [
+                            "GlueRole",
+                            "Arn"
+                        ]
+                    },
+                    "--REDSHIFT_DB": {
+                        "Fn::If": [ "IsProd", "rnr_prod", "rnr_dev" ]
+                    }
+                },
+                "ExecutionProperty": {
+                    "MaxConcurrentRuns": 1
+                },
+                "MaxRetries": 0,
+                "Name": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "rnr",
+                            "productdetailsjob",
+                            {
+                                "Fn::If": [
+                                    "IsDev",
+                                    {
+                                        "Fn::Join": [
+                                            "-",
+                                            [
+                                                {
+                                                    "Ref": "Env"
+                                                },
+                                                {
+                                                    "Ref": "Username"
+                                                }
+                                            ]
+                                        ]
+                                    },
+                                    {
+                                        "Ref": "Env"
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                },
+                "AllocatedCapacity": {
+                    "Fn::If": [
+                        "IsProd",
+                        "10",
+                        "10"
+                    ]
+                }
+            }
+        },
+        "GlueJobTrigger": {
+            "Type": "AWS::Glue::Trigger",
+            "Properties": {
+                "Name": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "rnr",
+                            "gluejobtrigger",
+                            {
+                                "Fn::If": [
+                                    "IsDev",
+                                    {
+                                        "Fn::Join": [
+                                            "-",
+                                            [
+                                                {
+                                                    "Ref": "Env"
+                                                },
+                                                {
+                                                    "Ref": "Username"
+                                                }
+                                            ]
+                                        ]
+                                    },
+                                    {
+                                        "Ref": "Env"
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                },
+                "Description": "Starts GLue Job",
+                "Type": "SCHEDULED",
+                "Schedule": "cron(0 2 * * ? *)",
+                "StartOnCreation": true,
+                "Actions": [
+                    {
+                        "JobName": {
+                            "Ref": "ProductDetailsGlueJob"
+                        }
+                    }
+                ],
+                "WorkflowName": {
+                    "Ref": "GlueWorkflow"
+                }
+            }
+        },
+        "GlueWorkflow": {
+            "Type": "AWS::Glue::Workflow",
+            "Properties": {
+                "Description": "Workflow for orchestrating ETL Jobs",
+                "Name": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "rnr",
+                            "glueworkflow",
+                            {
+                                "Fn::If": [
+                                    "IsDev",
+                                    {
+                                        "Fn::Join": [
+                                            "-",
+                                            [
+                                                {
+                                                    "Ref": "Env"
+                                                },
+                                                {
+                                                    "Ref": "Username"
+                                                }
+                                            ]
+                                        ]
+                                    },
+                                    {
+                                        "Ref": "Env"
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                }
+            }
+        },
+        "ConfigBucket": {
+            "Type": "AWS::S3::Bucket",
+            "DependsOn": "CreateScraperJobFunction",
+            "Properties": {
+                "BucketName": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "rnr",
+                            "config",
+                            {
+                                "Fn::If": [
+                                    "IsDev",
+                                    {
+                                        "Fn::Join": [
+                                            "-",
+                                            [
+                                                {
+                                                    "Ref": "Env"
+                                                },
+                                                {
+                                                    "Ref": "Username"
+                                                }
+                                            ]
+                                        ]
+                                    },
+                                    {
+                                        "Ref": "Env"
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                },
+                "Tags": [
+                    {
+                        "Key": "Project",
+                        "Value": "Mensa RnR"
+                    },
+                    {
+                        "Key": "Env",
+                        "Value": {
+                            "Ref": "Env"
+                        }
+                    },
+                    {
+                        "Key": "Owner",
+                        "Value": {
+                            "Ref": "Username"
+                        }
+                    }
+                ],
+                "AccessControl": "BucketOwnerFullControl",
+                "PublicAccessBlockConfiguration": {
+                    "BlockPublicAcls": true,
+                    "BlockPublicPolicy": true,
+                    "IgnorePublicAcls": true,
+                    "RestrictPublicBuckets": true
+                }
+            }
+        },
+        "LambdaRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "lambda.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "RoleName": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "rnr",
+                            "LambdaRole",
+                            {
+                                "Fn::If": [
+                                    "IsDev",
+                                    {
+                                        "Fn::Join": [
+                                            "-",
+                                            [
+                                                {
+                                                    "Ref": "Env"
+                                                },
+                                                {
+                                                    "Ref": "Username"
+                                                }
+                                            ]
+                                        ]
+                                    },
+                                    {
+                                        "Ref": "Env"
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                },
+                "Policies": [
+                    {
+                        "PolicyName": {
+                            "Fn::Join": [
+                                "-",
+                                [
+                                    "rnr",
+                                    "LambdaRole",
+                                    {
+                                        "Fn::If": [
+                                            "IsDev",
+                                            {
+                                                "Fn::Join": [
+                                                    "-",
+                                                    [
+                                                        {
+                                                            "Ref": "Env"
+                                                        },
+                                                        {
+                                                            "Ref": "Username"
+                                                        }
+                                                    ]
+                                                ]
+                                            },
+                                            {
+                                                "Ref": "Env"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            ]
+                        },
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Sid": "writelogs",
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "logs:CreateLogGroup",
+                                        "logs:CreateLogStream",
+                                        "logs:PutLogEvents"
+                                    ],
+                                    "Resource": "arn:aws:logs:*:*:*"
+                                },
+                                {
+                                    "Sid": "secretsManagerAccess",
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "secretsmanager:GetResourcePolicy",
+                                        "secretsmanager:GetSecretValue",
+                                        "secretsmanager:DescribeSecret",
+                                        "secretsmanager:ListSecretVersionIds",
+                                        "secretsmanager:ListSecrets"
+                                    ],
+                                    "Resource": [
+                                        "*"
+                                    ]
+                                },
+                                {
+                                    "Sid": "cloudWatchWriteAccess",
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "cloudwatch:PutMetricData"
+                                    ],
+                                    "Resource": [
+                                        "*"
+                                    ]
+                                },
+                                {
+                                    "Sid": "ec2Access",
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "ec2:DescribeVpcEndpoints",
+                                        "ec2:DescribeRouteTables",
+                                        "ec2:CreateNetworkInterface",
+                                        "ec2:DeleteNetworkInterface",
+                                        "ec2:DescribeNetworkInterfaces",
+                                        "ec2:DescribeSecurityGroups",
+                                        "ec2:DescribeSubnets",
+                                        "ec2:DescribeVpcAttribute"
+                                    ],
+                                    "Resource": [
+                                        "*"
+                                    ]
+                                },
+                                {
+                                    "Sid": "iamReadFullAccess",
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "iam:ListRolePolicies",
+                                        "iam:GetRole",
+                                        "iam:GetRolePolicy"
+                                    ],
+                                    "Resource": [
+                                        "*"
+                                    ]
+                                },
+                                {
+                                    "Sid": "logsReadWriteAccess",
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "logs:CreateLogGroup",
+                                        "logs:CreateLogStream",
+                                        "logs:PutLogEvents"
+                                    ],
+                                    "Resource": [
+                                        "arn:aws:logs:*:*:/aws-glue/*"
+                                    ]
+                                },
+                                {
+                                    "Sid": "s3ReadAccess",
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "s3:GetBucketLocation",
+                                        "s3:ListBucket",
+                                        "s3:ListAllMyBuckets",
+                                        "s3:GetBucketAcl"
+                                    ],
+                                    "Resource": [
+                                        "*"
+                                    ]
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "ec2:CreateTags",
+                                        "ec2:DeleteTags"
+                                    ],
+                                    "Condition": {
+                                        "ForAllValues:StringEquals": {
+                                            "aws:TagKeys": [
+                                                "aws-glue-service-resource"
+                                            ]
+                                        }
+                                    },
+                                    "Resource": [
+                                        "arn:aws:ec2:*:*:network-interface/*",
+                                        "arn:aws:ec2:*:*:security-group/*",
+                                        "arn:aws:ec2:*:*:instance/*"
+                                    ]
+                                },
+                                {
+                                    "Sid": "AllowBucketNotification",
+                                    "Effect": "Allow",
+                                    "Action": "s3:PutBucketNotification",
+                                    "Resource": [
+                                        {
+                                            "Fn::Sub": "arn:aws:s3:::*"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Sid": "AllowLambdaToPutEvents",
+                                    "Effect": "Allow",
+                                    "Action": "events:PutEvents",
+                                    "Resource": "*"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "PolicyName": {
+                            "Fn::Join": [
+                                "-",
+                                [
+                                    "rnr",
+                                    "s3bucketrole",
+                                    {
+                                        "Fn::If": [
+                                            "IsDev",
+                                            {
+                                                "Fn::Join": [
+                                                    "-",
+                                                    [
+                                                        {
+                                                            "Ref": "Env"
+                                                        },
+                                                        {
+                                                            "Ref": "Username"
+                                                        }
+                                                    ]
+                                                ]
+                                            },
+                                            {
+                                                "Ref": "Env"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            ]
+                        },
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": "s3:*",
+                                    "Resource": [
+                                        "arn:aws:s3:::mensa-github-sync/*",
+                                        "arn:aws:s3:::rnr-config*",
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    {
+                                                        "Fn::GetAtt": [
+                                                            "RawProductDetailsBucket",
+                                                            "Arn"
+                                                        ]
+                                                    },
+                                                    "/*"
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    {
+                                                        "Fn::GetAtt": [
+                                                            "RawProductReviewsBucket",
+                                                            "Arn"
+                                                        ]
+                                                    },
+                                                    "/*"
+                                                ]
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Project",
+                        "Value": "Mensa RnR"
+                    },
+                    {
+                        "Key": "Env",
+                        "Value": {
+                            "Ref": "Env"
+                        }
+                    },
+                    {
+                        "Key": "Owner",
+                        "Value": {
+                            "Ref": "Username"
+                        }
+                    }
+                ]
+            }
+        },
+        "CreateScraperJobFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "FunctionName": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "rnr",
+                            "createscraperjob",
+                            {
+                                "Fn::If": [
+                                    "IsDev",
+                                    {
+                                        "Fn::Join": [
+                                            "-",
+                                            [
+                                                {
+                                                    "Ref": "Env"
+                                                },
+                                                {
+                                                    "Ref": "Username"
+                                                }
+                                            ]
+                                        ]
+                                    },
+                                    {
+                                        "Ref": "Env"
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                },
+                "Description": "Function to create sitemap and run a job",
+                "Handler": "create_scraper_job.lambda_handler",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "LambdaRole",
+                        "Arn"
+                    ]
+                },
+                "Code": {
+                    "S3Bucket": "mensa-github-sync",
+                    "S3Key": {
+                        "Fn::If": [
+                            "IsProd",
+                            "brand-analytics/lambda/create_scraper_job.py.zip",
+                            "brand-analytics-dev/lambda/create_scraper_job.py.zip"
+                        ]
+                    }
+                },
+                "Timeout": 15,
+                "Runtime": "python3.7",
+                "Tags": [
+                    {
+                        "Key": "Project",
+                        "Value": "Mensa RnR"
+                    },
+                    {
+                        "Key": "Env",
+                        "Value": {
+                            "Ref": "Env"
+                        }
+                    },
+                    {
+                        "Key": "Owner",
+                        "Value": {
+                            "Ref": "Username"
+                        }
+                    }
+                ],
+                "Environment": {
+                    "Variables": {
+                        "ENV": {
+                            "Ref": "Env"
+                        }
+                    }
+                }
+            }
+        },
+        "ScraperJobCallbackApiGateway": {
+            "Type": "AWS::ApiGateway::RestApi",
+            "Properties": {
+                "Description": "Rest API Gateway",
+                "EndpointConfiguration": {
+                    "Types": [
+                        "REGIONAL"
+                    ]
+                },
+                "Name": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "rnr",
+                            "scraperjobcallback",
+                            {
+                                "Fn::If": [
+                                    "IsDev",
+                                    {
+                                        "Fn::Join": [
+                                            "-",
+                                            [
+                                                {
+                                                    "Ref": "Env"
+                                                },
+                                                {
+                                                    "Ref": "Username"
+                                                }
+                                            ]
+                                        ]
+                                    },
+                                    {
+                                        "Ref": "Env"
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                },
+                "Tags": [
+                    {
+                        "Key": "Project",
+                        "Value": "Mensa RnR"
+                    },
+                    {
+                        "Key": "Env",
+                        "Value": {
+                            "Ref": "Env"
+                        }
+                    },
+                    {
+                        "Key": "Owner",
+                        "Value": {
+                            "Ref": "Username"
+                        }
+                    }
+                ]
+            }
+        },
+        "ScraperJobCallbackApiGatewayMethod": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "POST",
+                "Integration": {
+                    "IntegrationHttpMethod": "POST",
+                    "Type": "AWS_PROXY",
+                    "Uri": {
+                        "Fn::Sub": [
+                            "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaArn}/invocations",
+                            {
+                                "lambdaArn": {
+                                    "Fn::GetAtt": [
+                                        "ScraperJobCallbackFunction",
+                                        "Arn"
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                },
+                "ResourceId": {
+                    "Fn::GetAtt": [
+                        "ScraperJobCallbackApiGateway",
+                        "RootResourceId"
+                    ]
+                },
+                "RestApiId": {
+                    "Ref": "ScraperJobCallbackApiGateway"
+                }
+            }
+        },
+        "ScraperJobCallbackApiGatewayDeployment": {
+            "Type": "AWS::ApiGateway::Deployment",
+            "DependsOn": [
+                "ScraperJobCallbackApiGatewayMethod"
+            ],
+            "Properties": {
+                "RestApiId": {
+                    "Ref": "ScraperJobCallbackApiGateway"
+                },
+                "StageName": "callback"
+            }
+        },
+        "ScraperJobCallbackFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Description": "Function to handle callbacks from scraper after successful job run",
+                "FunctionName": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "rnr",
+                            "scrapercallback",
+                            {
+                                "Fn::If": [
+                                    "IsDev",
+                                    {
+                                        "Fn::Join": [
+                                            "-",
+                                            [
+                                                {
+                                                    "Ref": "Env"
+                                                },
+                                                {
+                                                    "Ref": "Username"
+                                                }
+                                            ]
+                                        ]
+                                    },
+                                    {
+                                        "Ref": "Env"
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                },
+                "Handler": "scraper_callback.lambda_handler",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "LambdaRole",
+                        "Arn"
+                    ]
+                },
+                "Code": {
+                    "S3Bucket": "mensa-github-sync",
+                    "S3Key": {
+                        "Fn::If": [
+                            "IsProd",
+                            "brand-analytics/lambda/scraper_callback.py.zip",
+                            "brand-analytics-dev/lambda/scraper_callback.py.zip"
+                        ]
+                    }
+                },
+                "Timeout": 15,
+                "Runtime": "python3.7",
+                "Tags": [
+                    {
+                        "Key": "Project",
+                        "Value": "Mensa RnR"
+                    },
+                    {
+                        "Key": "Env",
+                        "Value": {
+                            "Ref": "Env"
+                        }
+                    },
+                    {
+                        "Key": "Owner",
+                        "Value": {
+                            "Ref": "Username"
+                        }
+                    }
+                ],
+                "Environment": {
+                    "Variables": {
+                        "ENV": {
+                            "Ref": "Env"
+                        },
+                        "PRODUCT_DETAIL_BUCKET": {
+                            "Ref": "RawProductDetailsBucket"
+                        },
+                        "PRODUCT_REVIEW_BUCKET": {
+                            "Ref": "RawProductReviewsBucket"
+                        }
+                    }
+                }
+            }
+        },
+        "LambdaApiGatewayPermission": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName": {
+                    "Fn::GetAtt": [
+                        "ScraperJobCallbackFunction",
+                        "Arn"
+                    ]
+                },
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                    "Fn::Sub": "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ScraperJobCallbackApiGateway}/callback/POST/"
+                }
+            }
+        },
+        "ConfigBucketEventPermission": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "Action": "lambda:invokeFunction",
+                "SourceAccount": {
+                    "Ref": "AWS::AccountId"
+                },
+                "FunctionName": {
+                    "Ref": "CreateScraperJobFunction"
+                },
+                "SourceArn": {
+                    "Fn::GetAtt": [
+                        "ConfigBucket",
+                        "Arn"
+                    ]
+                },
+                "Principal": "s3.amazonaws.com"
+            }
+        },
+        "AddBucketNotificationFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Description": "Add Notification Events to S3 bucket ",
+                "Handler": "index.handler",
+                "Runtime": "python3.9",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "LambdaRole",
+                        "Arn"
+                    ]
+                },
+                "Timeout": 15,
+                "Code": {
+                    "ZipFile": "import boto3\nimport logging\nimport json\nimport cfnresponse\n\ns3Client = boto3.client('s3')\nlogger = logging.getLogger()\nlogger.setLevel(logging.DEBUG)\n\ndef addBucketNotification(bucketName, notificationId, functionArn):\n  notificationResponse = s3Client.put_bucket_notification_configuration(\n    Bucket=bucketName,\n    NotificationConfiguration={\n      'LambdaFunctionConfigurations': [\n        {\n          'Id': notificationId,\n          'LambdaFunctionArn': functionArn,\n          'Events': [\n            's3:ObjectCreated:*'\n          ]\n        },\n      ]\n    }\n  )\n  return notificationResponse\n\ndef create(properties, physical_id):\n  bucketName = properties['S3Bucket']\n  notificationId = properties['NotificationId']\n  functionArn = properties['FunctionARN']\n  response = addBucketNotification(bucketName, notificationId, functionArn)\n  logger.info('AddBucketNotification response: %s' % json.dumps(response))\n  return cfnresponse.SUCCESS, physical_id\n\ndef update(properties, physical_id):\n  return cfnresponse.SUCCESS, None\n\ndef delete(properties, physical_id):\n  return cfnresponse.SUCCESS, None\n\ndef handler(event, context):\n  logger.info('Received event: %s' % json.dumps(event))\n\n  status = cfnresponse.FAILED\n  new_physical_id = None\n\n  try:\n    properties = event.get('ResourceProperties')\n    physical_id = event.get('PhysicalResourceId')\n\n    status, new_physical_id = {\n      'Create': create,\n      'Update': update,\n      'Delete': delete\n    }.get(event['RequestType'], lambda x, y: (cfnresponse.FAILED, None))(properties, physical_id)\n  except Exception as e:\n    logger.error('Exception: %s' % e)\n    status = cfnresponse.FAILED\n  finally:\n    cfnresponse.send(event, context, status, {}, new_physical_id)\n"
+                },
+                "Tags": [
+                    {
+                        "Key": "Project",
+                        "Value": "Mensa RnR"
+                    },
+                    {
+                        "Key": "Env",
+                        "Value": {
+                            "Ref": "Env"
+                        }
+                    },
+                    {
+                        "Key": "Owner",
+                        "Value": {
+                            "Ref": "Username"
+                        }
+                    }
+                ],
+                "Environment": {
+                    "Variables": {
+                        "ENV": {
+                            "Ref": "Env"
+                        }
+                    }
+                }
+            }
+        },
+        "AddNotification": {
+            "Type": "Custom::AddNotification",
+            "Properties": {
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "AddBucketNotificationFunction",
+                        "Arn"
+                    ]
+                },
+                "S3Bucket": {
+                    "Ref": "ConfigBucket"
+                },
+                "FunctionARN": {
+                    "Fn::GetAtt": [
+                        "CreateScraperJobFunction",
+                        "Arn"
+                    ]
+                },
+                "NotificationId": "S3ObjectCreatedEvent"
+            }
+        }
+    },
+    "Mappings": {},
+    "Conditions": {
+        "IsProd": {
+            "Fn::Equals": [
+                {
+                    "Ref": "Env"
+                },
+                "prod"
+            ]
+        },
+        "IsStage": {
+            "Fn::Equals": [
+                {
+                    "Ref": "Env"
+                },
+                "stage"
+            ]
+        },
+        "IsDev": {
+            "Fn::Equals": [
+                {
+                    "Ref": "Env"
+                },
+                "dev"
+            ]
+        },
+        "IsProdOrStage": {
+            "Fn::Or": [
+                {
+                    "Condition": "IsProd"
+                },
+                {
+                    "Condition": "IsStage"
+                }
+            ]
+        }
+    },
+    "Outputs": {
+        "ReviewStagingDB": {
+            "Description": "Name of Staging Review Data Glue DB for Product Reviews",
+            "Value": {
+                "Ref": "ReviewStagingDB"
+            },
+            "Export": {
+                "Name": {
+                    "Fn::Sub": "${AWS::StackName}-ReviewStagingDB"
+                }
+            }
+        },
+        "ReviewStagingCrawler": {
+            "Description": "Name of Staging Review Data Glue Crawler for Product Reviews",
+            "Value": {
+                "Ref": "ReviewStagingCrawler"
+            },
+            "Export": {
+                "Name": {
+                    "Fn::Sub": "${AWS::StackName}-ReviewStagingCrawler"
+                }
+            }
+        },
+        "ApiGatewayInvokeURL": {
+            "Description": "Endpoint of API Gateway for scraper notification callback",
+            "Value": {
+                "Fn::Sub": "https://${ScraperJobCallbackApiGateway}.execute-api.${AWS::Region}.amazonaws.com/callback"
+            }
+        }
+    }
+}

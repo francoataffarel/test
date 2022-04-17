@@ -1,0 +1,132 @@
+{
+  "id": "/rnr-product-schema",
+  "type": "object",
+  "description": "Product Schema for testing",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Product ID",
+      "minLength": 1
+    },
+    "sku": {
+      "type": "string",
+      "description": "Product SKU ID",
+      "minLength": 1
+    },
+    "name": {
+      "type": "string",
+      "description": "Product Name",
+      "minLength": 1
+    },
+    "mrp": {
+      "type": "string",
+      "description": "Product MRP",
+      "minLength": 1,
+      "pattern":"^[0-9]+\\$*"
+    },
+    "price": {
+      "type": "string",
+      "description": "Product Price",
+      "minLength": 1,
+      "pattern":"^[0-9]+\\$*"
+    },
+    "discount": {
+      "type": "string",
+      "description": "Product Discount",
+      "minLength": 1
+    },
+    "product_href": {
+      "type": "string",
+      "description": "Product Href",
+      "minLength": 1
+    },
+    "rating": {
+      "type": "string",
+      "description": "Product Rating",
+      "pattern":"^[0-5]+\\$*"
+    },
+    "rating_count": {
+      "type": "string",
+      "description": "Product Rating Count",
+      "pattern":"^[0-9]+\\$*"
+    },
+    "rating_star": {
+      "type": "string",
+      "description": "Product Rating Star"
+    },
+    "rating_aspect": {
+      "type": "string",
+      "description": "Product Rating Aspect"
+    },
+    "best_seller_rank": {
+      "type": "string",
+      "description": "Product Best Seller Rank",
+      "minLength": 1
+    },
+    "extracted_date": {
+      "type": "string",
+      "description": "Product Extracted Date",
+      "minLength": 8,
+      "maxLength": 8
+    },
+    "available": {
+      "type": "boolean",
+      "description": "Product Availability"
+    },
+    "reviews_href": {
+      "type": "string",
+      "description": "Product Reviews Href",
+      "minLength": 1
+    },
+    "category": {
+      "type": "string",
+      "description": "Product Category",
+      "minLength": 1
+    },
+    "channel": {
+      "type": "string",
+      "enum": [
+        "Amazon IN",
+        "Amazon COM",
+        "Amazon CA",
+        "Amazon AE",
+        "Flipkart",
+        "Myntra",
+        "Nykaa",
+        "Nykaa Fashion"
+      ]
+    },
+    "sub_categories": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Product Sub Category",
+      "minLength": 1
+    },
+    "brand": {
+      "type": "string",
+      "description": "Product Brand",
+      "minLength": 1
+    }
+  },
+  "required": [
+    "sku",
+    "name",
+    "mrp",
+    "price",
+    "discount",
+    "product_href",
+    "rating",
+    "rating_count",
+    "rating_star",
+    "rating_aspect",
+    "best_seller_rank",
+    "extracted_date",
+    "available",
+    "reviews_href",
+    "category",
+    "sub_categories",
+    "brand"
+  ]
+}

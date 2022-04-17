@@ -1,0 +1,20 @@
+name: Integration Test Workflow
+
+on: ["push","pull_request"]
+
+env:
+    PROXY_ROTATING: http://user-${{ secrets.SMART_PROXY_USERNAME }}:${{ secrets.SMART_PROXY_PASSWORD }}@in.smartproxy.com:10000
+    PROXY_SESSION: http://user-${{ secrets.SMART_PROXY_USERNAME }}-sessionduration-1:${{ secrets.SMART_PROXY_PASSWORD }}@in.smartproxy.com:10001
+    PROXY_SESSION_US: http://user-${{ secrets.SMART_PROXY_USERNAME }}-sessionduration-1:${{ secrets.SMART_PROXY_PASSWORD }}@us.smartproxy.com:10002
+
+jobs:
+  build:
+    name: "Schedule Integration test"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Python dependencies
+        run: |
+            pip install -r .github/../.github/workflows/requirements.txt
+      - name: "Python Run Test Script"
+        run: python3 -m test_suite.file_changes ALL_FILES

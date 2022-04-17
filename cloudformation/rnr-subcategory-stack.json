@@ -1,0 +1,1387 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Parameters": {
+        "Env": {
+            "AllowedValues": [
+                "dev",
+                "stage",
+                "prod"
+            ],
+            "Default": "dev",
+            "Description": "Please select a Environment",
+            "Type": "String"
+        },
+        "Username": {
+            "Type": "String",
+            "Description": "Please enter your username",
+            "AllowedPattern": "^[a-z]+$"
+        }
+    },
+    "Resources": {
+        "RawCategoryMappingBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "BucketName": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "rnr",
+                            "rawcategorymapping",
+                            {
+                                "Fn::If": [
+                                    "IsDev",
+                                    {
+                                        "Fn::Join": [
+                                            "-",
+                                            [
+                                                {
+                                                    "Ref": "Env"
+                                                },
+                                                {
+                                                    "Ref": "Username"
+                                                }
+                                            ]
+                                        ]
+                                    },
+                                    {
+                                        "Ref": "Env"
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                },
+                "Tags": [
+                    {
+                        "Key": "Project",
+                        "Value": "Mensa RnR"
+                    },
+                    {
+                        "Key": "Env",
+                        "Value": {
+                            "Ref": "Env"
+                        }
+                    },
+                    {
+                        "Key": "Owner",
+                        "Value": {
+                            "Ref": "Username"
+                        }
+                    }
+                ],
+                "AccessControl": "BucketOwnerFullControl",
+                "PublicAccessBlockConfiguration": {
+                    "BlockPublicAcls": true,
+                    "BlockPublicPolicy": true,
+                    "IgnorePublicAcls": true,
+                    "RestrictPublicBuckets": true
+                }
+            }
+        },
+        "RawSkuMappingBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "BucketName": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "rnr",
+                            "rawskumapping",
+                            {
+                                "Fn::If": [
+                                    "IsDev",
+                                    {
+                                        "Fn::Join": [
+                                            "-",
+                                            [
+                                                {
+                                                    "Ref": "Env"
+                                                },
+                                                {
+                                                    "Ref": "Username"
+                                                }
+                                            ]
+                                        ]
+                                    },
+                                    {
+                                        "Ref": "Env"
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                },
+                "Tags": [
+                    {
+                        "Key": "Project",
+                        "Value": "Mensa RnR"
+                    },
+                    {
+                        "Key": "Env",
+                        "Value": {
+                            "Ref": "Env"
+                        }
+                    },
+                    {
+                        "Key": "Owner",
+                        "Value": {
+                            "Ref": "Username"
+                        }
+                    }
+                ],
+                "AccessControl": "BucketOwnerFullControl",
+                "PublicAccessBlockConfiguration": {
+                    "BlockPublicAcls": true,
+                    "BlockPublicPolicy": true,
+                    "IgnorePublicAcls": true,
+                    "RestrictPublicBuckets": true
+                }
+            }
+        },
+        "MappingBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "BucketName": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "rnr",
+                            "mapping",
+                            {
+                                "Fn::If": [
+                                    "IsDev",
+                                    {
+                                        "Fn::Join": [
+                                            "-",
+                                            [
+                                                {
+                                                    "Ref": "Env"
+                                                },
+                                                {
+                                                    "Ref": "Username"
+                                                }
+                                            ]
+                                        ]
+                                    },
+                                    {
+                                        "Ref": "Env"
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                },
+                "Tags": [
+                    {
+                        "Key": "Project",
+                        "Value": "Mensa RnR"
+                    },
+                    {
+                        "Key": "Env",
+                        "Value": {
+                            "Ref": "Env"
+                        }
+                    },
+                    {
+                        "Key": "Owner",
+                        "Value": {
+                            "Ref": "Username"
+                        }
+                    }
+                ],
+                "AccessControl": "BucketOwnerFullControl",
+                "PublicAccessBlockConfiguration": {
+                    "BlockPublicAcls": true,
+                    "BlockPublicPolicy": true,
+                    "IgnorePublicAcls": true,
+                    "RestrictPublicBuckets": true
+                }
+            }
+        },
+        "RawMappingDB": {
+            "Type": "AWS::Glue::Database",
+            "Properties": {
+                "DatabaseInput": {
+                    "Name": {
+                        "Fn::Join": [
+                            "-",
+                            [
+                                "rnr",
+                                "rawmappingdb",
+                                {
+                                    "Fn::If": [
+                                        "IsDev",
+                                        {
+                                            "Fn::Join": [
+                                                "-",
+                                                [
+                                                    {
+                                                        "Ref": "Env"
+                                                    },
+                                                    {
+                                                        "Ref": "Username"
+                                                    }
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Ref": "Env"
+                                        }
+                                    ]
+                                }
+                            ]
+                        ]
+                    },
+                    "Description": "Glue database to store tables after crawling RawCategory & RawSku Bucket"
+                },
+                "CatalogId": {
+                    "Ref": "AWS::AccountId"
+                }
+            }
+        },
+        "CleanMappingDB": {
+            "Type": "AWS::Glue::Database",
+            "Properties": {
+                "DatabaseInput": {
+                    "Name": {
+                        "Fn::Join": [
+                            "-",
+                            [
+                                "rnr",
+                                "cleanmappingdb",
+                                {
+                                    "Fn::If": [
+                                        "IsDev",
+                                        {
+                                            "Fn::Join": [
+                                                "-",
+                                                [
+                                                    {
+                                                        "Ref": "Env"
+                                                    },
+                                                    {
+                                                        "Ref": "Username"
+                                                    }
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Ref": "Env"
+                                        }
+                                    ]
+                                }
+                            ]
+                        ]
+                    },
+                    "Description": "Glue database to store tables after crawling Clean Category & Sku Buckets"
+                },
+                "CatalogId": {
+                    "Ref": "AWS::AccountId"
+                }
+            }
+        },
+        "CleanMappingCrawler": {
+            "Type": "AWS::Glue::Crawler",
+            "Properties": {
+                "Name": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "rnr",
+                            "cleanmappingcrawler",
+                            {
+                                "Fn::If": [
+                                    "IsDev",
+                                    {
+                                        "Fn::Join": [
+                                            "-",
+                                            [
+                                                {
+                                                    "Ref": "Env"
+                                                },
+                                                {
+                                                    "Ref": "Username"
+                                                }
+                                            ]
+                                        ]
+                                    },
+                                    {
+                                        "Ref": "Env"
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                },
+                "Role": {
+                    "Fn::GetAtt": [
+                        "MappingGlueRole",
+                        "Arn"
+                    ]
+                },
+                "Description": "Glue Crawler to crawl Clean Category Mapping Bucket",
+                "DatabaseName": {
+                    "Ref": "CleanMappingDB"
+                },
+                "Tags": {
+                    "Project": "Mensa RnR",
+                    "Env": {
+                        "Ref": "Env"
+                    },
+                    "Owner": {
+                        "Ref": "Username"
+                    }
+                },
+                "RecrawlPolicy": {
+                    "RecrawlBehavior": "CRAWL_NEW_FOLDERS_ONLY"
+                },
+                "Configuration": "{\"Version\":1.0,\"Grouping\":{\"TableLevelConfiguration\":2}}",
+                "Targets": {
+                    "S3Targets": [
+                        {
+                            "Path": {
+                                "Ref": "MappingBucket"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "RawCategoryMappingCrawler": {
+            "Type": "AWS::Glue::Crawler",
+            "Properties": {
+                "Name": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "rnr",
+                            "rawcategorymappingcrawler",
+                            {
+                                "Fn::If": [
+                                    "IsDev",
+                                    {
+                                        "Fn::Join": [
+                                            "-",
+                                            [
+                                                {
+                                                    "Ref": "Env"
+                                                },
+                                                {
+                                                    "Ref": "Username"
+                                                }
+                                            ]
+                                        ]
+                                    },
+                                    {
+                                        "Ref": "Env"
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                },
+                "Role": {
+                    "Fn::GetAtt": [
+                        "MappingGlueRole",
+                        "Arn"
+                    ]
+                },
+                "Description": "Glue Crawler to crawl Raw Category Mapping Bucket",
+                "DatabaseName": {
+                    "Ref": "RawMappingDB"
+                },
+                "Tags": {
+                    "Project": "Mensa RnR",
+                    "Env": {
+                        "Ref": "Env"
+                    },
+                    "Owner": {
+                        "Ref": "Username"
+                    }
+                },
+                "RecrawlPolicy": {
+                    "RecrawlBehavior": "CRAWL_NEW_FOLDERS_ONLY"
+                },
+                "Targets": {
+                    "S3Targets": [
+                        {
+                            "Path": {
+                                "Ref": "RawCategoryMappingBucket"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "RawSkuMappingCrawler": {
+            "Type": "AWS::Glue::Crawler",
+            "Properties": {
+                "Name": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "rnr",
+                            "rawskumappingcrawler",
+                            {
+                                "Fn::If": [
+                                    "IsDev",
+                                    {
+                                        "Fn::Join": [
+                                            "-",
+                                            [
+                                                {
+                                                    "Ref": "Env"
+                                                },
+                                                {
+                                                    "Ref": "Username"
+                                                }
+                                            ]
+                                        ]
+                                    },
+                                    {
+                                        "Ref": "Env"
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                },
+                "Role": {
+                    "Fn::GetAtt": [
+                        "MappingGlueRole",
+                        "Arn"
+                    ]
+                },
+                "Description": "Glue Crawler to crawl Raw Sku Mapping Bucket",
+                "DatabaseName": {
+                    "Ref": "RawMappingDB"
+                },
+                "Tags": {
+                    "Project": "Mensa RnR",
+                    "Env": {
+                        "Ref": "Env"
+                    },
+                    "Owner": {
+                        "Ref": "Username"
+                    }
+                },
+                "RecrawlPolicy": {
+                    "RecrawlBehavior": "CRAWL_NEW_FOLDERS_ONLY"
+                },
+                "Targets": {
+                    "S3Targets": [
+                        {
+                            "Path": {
+                                "Ref": "RawSkuMappingBucket"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "RawCategoryMappingTable": {
+            "Type": "AWS::Glue::Table",
+            "DependsOn": "RawMappingDB",
+            "Properties": {
+                "TableInput": {
+                    "Name": {
+                        "Fn::Join": [
+                            "-",
+                            [
+                                "rnr",
+                                "rawcategorymappingtable",
+                                {
+                                    "Fn::If": [
+                                        "IsDev",
+                                        {
+                                            "Fn::Join": [
+                                                "-",
+                                                [
+                                                    {
+                                                        "Ref": "Env"
+                                                    },
+                                                    {
+                                                        "Ref": "Username"
+                                                    }
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Ref": "Env"
+                                        }
+                                    ]
+                                }
+                            ]
+                        ]
+                    },
+                    "Retention": 0,
+                    "Description": "Glue Table which hold schema for RNR raw category mapping data files",
+                    "TableType": "EXTERNAL_TABLE",
+                    "Parameters": {
+                        "CrawlerSchemaSerializerVersion": "1.0",
+                        "CrawlerSchemaDeserializerVersion": "1.0",
+                        "compressionType": "none",
+                        "classification": "csv",
+                        "typeOfData": "file",
+                        "columnsOrdered": true,
+                        "areColumnsQuoted": false,
+                        "delimiter": ",",
+                        "skip.header.line.count": 1,
+                        "UPDATED_BY_CRAWLER": {
+                            "Ref": "RawCategoryMappingCrawler"
+                        }
+                    },
+                    "StorageDescriptor": {
+                        "Columns": [
+                            {
+                                "Name": "keyword",
+                                "Type": "string",
+                                "Comment": ""
+                            },
+                            {
+                                "Name": "category",
+                                "Type": "string",
+                                "Comment": ""
+                            },
+                            {
+                                "Name": "subcategory",
+                                "Type": "string",
+                                "Comment": ""
+                            }
+                        ],
+                        "Location": {
+                            "Fn::Sub": "s3://${RawCategoryMappingBucket}"
+                        },
+                        "InputFormat": "org.apache.hadoop.mapred.TextInputFormat",
+                        "OutputFormat": "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat",
+                        "Compressed": "false",
+                        "NumberOfBuckets": "-1",
+                        "SerdeInfo": {
+                            "SerializationLibrary": "org.apache.hadoop.hive.serde2.OpenCSVSerde",
+                            "Parameters": {
+                                "paths": "keyword,subcategory,category",
+                                "escapeChar": "\\",
+                                "quoteChar": "\"",
+                                "field.delim": ","
+                            }
+                        },
+                        "Parameters": {
+                            "CrawlerSchemaSerializerVersion": "1.0",
+                            "CrawlerSchemaDeserializerVersion": "1.0",
+                            "compressionType": "none",
+                            "classification": "csv",
+                            "typeOfData": "file",
+                            "columnsOrdered": true,
+                            "areColumnsQuoted": false,
+                            "delimiter": ",",
+                            "skip.header.line.count": 1
+                        },
+                        "StoredAsSubDirectories": "false"
+                    }
+                },
+                "DatabaseName": {
+                    "Ref": "RawMappingDB"
+                },
+                "CatalogId": {
+                    "Ref": "AWS::AccountId"
+                }
+            }
+        },
+        "RawSkuMappingTable": {
+            "Type": "AWS::Glue::Table",
+            "DependsOn": "RawMappingDB",
+            "Properties": {
+                "TableInput": {
+                    "Name": {
+                        "Fn::Join": [
+                            "-",
+                            [
+                                "rnr",
+                                "rawskumappingtable",
+                                {
+                                    "Fn::If": [
+                                        "IsDev",
+                                        {
+                                            "Fn::Join": [
+                                                "-",
+                                                [
+                                                    {
+                                                        "Ref": "Env"
+                                                    },
+                                                    {
+                                                        "Ref": "Username"
+                                                    }
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Ref": "Env"
+                                        }
+                                    ]
+                                }
+                            ]
+                        ]
+                    },
+                    "Retention": 0,
+                    "Description": "Glue Table which hold schema for RNR raw sku mapping data files",
+                    "TableType": "EXTERNAL_TABLE",
+                    "Parameters": {
+                        "CrawlerSchemaSerializerVersion": "1.0",
+                        "CrawlerSchemaDeserializerVersion": "1.0",
+                        "compressionType": "none",
+                        "classification": "csv",
+                        "typeOfData": "file",
+                        "columnsOrdered": true,
+                        "areColumnsQuoted": false,
+                        "delimiter": ",",
+                        "skip.header.line.count": 1,
+                        "UPDATED_BY_CRAWLER": {
+                            "Ref": "RawSkuMappingCrawler"
+                        }
+                    },
+                    "StorageDescriptor": {
+                        "Columns": [
+                            {
+                                "Name": "brand",
+                                "Type": "string",
+                                "Comment": ""
+                            },
+                            {
+                                "Name": "skuid",
+                                "Type": "string",
+                                "Comment": ""
+                            },
+                            {
+                                "Name": "category",
+                                "Type": "string",
+                                "Comment": ""
+                            },
+                            {
+                                "Name": "subcategory",
+                                "Type": "string",
+                                "Comment": ""
+                            },
+                            {
+                                "Name": "amazon_skuid",
+                                "Type": "string",
+                                "Comment": ""
+                            },
+                            {
+                                "Name": "flipkart_skuid",
+                                "Type": "string",
+                                "Comment": ""
+                            },
+                            {
+                                "Name": "myntra_skuid",
+                                "Type": "string",
+                                "Comment": ""
+                            },
+                            {
+                                "Name": "nykaa_skuid",
+                                "Type": "string",
+                                "Comment": ""
+                            },
+                            {
+                                "Name": "ajio_skuid",
+                                "Type": "string",
+                                "Comment": ""
+                            }
+                        ],
+                        "Location": {
+                            "Fn::Sub": "s3://${RawSkuMappingBucket}"
+                        },
+                        "InputFormat": "org.apache.hadoop.mapred.TextInputFormat",
+                        "OutputFormat": "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat",
+                        "Compressed": "false",
+                        "NumberOfBuckets": "-1",
+                        "SerdeInfo": {
+                            "SerializationLibrary": "org.apache.hadoop.hive.serde2.OpenCSVSerde",
+                            "Parameters": {
+                                "paths": "brand,skuid,category,subcategory,amazon_skuid,flipkart_skuid,myntra_skuid,nykaa_skuid,ajio_skuid",
+                                "escapeChar": "\\",
+                                "quoteChar": "\"",
+                                "field.delim": ","
+                            }
+                        },
+                        "Parameters": {
+                            "CrawlerSchemaSerializerVersion": "1.0",
+                            "CrawlerSchemaDeserializerVersion": "1.0",
+                            "compressionType": "none",
+                            "classification": "csv",
+                            "typeOfData": "file",
+                            "columnsOrdered": true,
+                            "areColumnsQuoted": false,
+                            "delimiter": ",",
+                            "skip.header.line.count": 1
+                        },
+                        "StoredAsSubDirectories": "false"
+                    }
+                },
+                "DatabaseName": {
+                    "Ref": "RawMappingDB"
+                },
+                "CatalogId": {
+                    "Ref": "AWS::AccountId"
+                }
+            }
+        },
+        "MappingGlueRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "glue.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "Path": "/",
+                "RoleName": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "rnr",
+                            "mappinggluerole",
+                            {
+                                "Fn::If": [
+                                    "IsDev",
+                                    {
+                                        "Fn::Join": [
+                                            "-",
+                                            [
+                                                {
+                                                    "Ref": "Env"
+                                                },
+                                                {
+                                                    "Ref": "Username"
+                                                }
+                                            ]
+                                        ]
+                                    },
+                                    {
+                                        "Ref": "Env"
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                },
+                "Policies": [
+                    {
+                        "PolicyName": {
+                            "Fn::Join": [
+                                "-",
+                                [
+                                    "rnr",
+                                    "mappingglueservicerole",
+                                    {
+                                        "Fn::If": [
+                                            "IsDev",
+                                            {
+                                                "Fn::Join": [
+                                                    "-",
+                                                    [
+                                                        {
+                                                            "Ref": "Env"
+                                                        },
+                                                        {
+                                                            "Ref": "Username"
+                                                        }
+                                                    ]
+                                                ]
+                                            },
+                                            {
+                                                "Ref": "Env"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            ]
+                        },
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Sid": "cloudWatchWriteAccess",
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "cloudwatch:PutMetricData"
+                                    ],
+                                    "Resource": [
+                                        "*"
+                                    ]
+                                },
+                                {
+                                    "Sid": "ec2Access",
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "ec2:DescribeVpcEndpoints",
+                                        "ec2:DescribeRouteTables",
+                                        "ec2:CreateNetworkInterface",
+                                        "ec2:DeleteNetworkInterface",
+                                        "ec2:DescribeNetworkInterfaces",
+                                        "ec2:DescribeSecurityGroups",
+                                        "ec2:DescribeSubnets",
+                                        "ec2:DescribeVpcAttribute"
+                                    ],
+                                    "Resource": [
+                                        "*"
+                                    ]
+                                },
+                                {
+                                    "Sid": "glueFullAcess",
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "glue:*"
+                                    ],
+                                    "Resource": [
+                                        "*"
+                                    ]
+                                },
+                                {
+                                    "Sid": "iamReadFullAccess",
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "iam:ListRolePolicies",
+                                        "iam:GetRole",
+                                        "iam:GetRolePolicy"
+                                    ],
+                                    "Resource": [
+                                        "*"
+                                    ]
+                                },
+                                {
+                                    "Sid": "logsReadWriteAccess",
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "logs:CreateLogGroup",
+                                        "logs:CreateLogStream",
+                                        "logs:PutLogEvents"
+                                    ],
+                                    "Resource": [
+                                        "arn:aws:logs:*:*:/aws-glue/*"
+                                    ]
+                                },
+                                {
+                                    "Sid": "s3ReadAccess",
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "s3:GetBucketLocation",
+                                        "s3:ListBucket",
+                                        "s3:ListAllMyBuckets",
+                                        "s3:GetBucketAcl"
+                                    ],
+                                    "Resource": [
+                                        "*"
+                                    ]
+                                },
+                                {
+                                    "Sid": "s3CreateBucketAccess",
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "s3:CreateBucket"
+                                    ],
+                                    "Resource": [
+                                        "arn:aws:s3:::aws-glue-*"
+                                    ]
+                                },
+                                {
+                                    "Sid": "s3ReadWriteAccess",
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "s3:GetObject",
+                                        "s3:PutObject",
+                                        "s3:DeleteObject"
+                                    ],
+                                    "Resource": [
+                                        "arn:aws:s3:::crawler-public*",
+                                        "arn:aws:s3:::aws-glue-*/*",
+                                        "arn:aws:s3:::*/*aws-glue-*/*"
+                                    ]
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "ec2:CreateTags",
+                                        "ec2:DeleteTags"
+                                    ],
+                                    "Condition": {
+                                        "ForAllValues:StringEquals": {
+                                            "aws:TagKeys": [
+                                                "aws-glue-service-resource"
+                                            ]
+                                        }
+                                    },
+                                    "Resource": [
+                                        "arn:aws:ec2:*:*:network-interface/*",
+                                        "arn:aws:ec2:*:*:security-group/*",
+                                        "arn:aws:ec2:*:*:instance/*"
+                                    ]
+                                },
+                                {
+                                    "Sid": "AllowGlueToPutEvents",
+                                    "Effect": "Allow",
+                                    "Action": "events:PutEvents",
+                                    "Resource": "*"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "PolicyName": {
+                            "Fn::Join": [
+                                "-",
+                                [
+                                    "rnr",
+                                    "s3mappingbucketrole",
+                                    {
+                                        "Fn::If": [
+                                            "IsDev",
+                                            {
+                                                "Fn::Join": [
+                                                    "-",
+                                                    [
+                                                        {
+                                                            "Ref": "Env"
+                                                        },
+                                                        {
+                                                            "Ref": "Username"
+                                                        }
+                                                    ]
+                                                ]
+                                            },
+                                            {
+                                                "Ref": "Env"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            ]
+                        },
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": "s3:*",
+                                    "Resource": [
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    {
+                                                        "Fn::GetAtt": [
+                                                            "RawCategoryMappingBucket",
+                                                            "Arn"
+                                                        ]
+                                                    },
+                                                    "/*"
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    {
+                                                        "Fn::GetAtt": [
+                                                            "RawSkuMappingBucket",
+                                                            "Arn"
+                                                        ]
+                                                    },
+                                                    "/*"
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    {
+                                                        "Fn::GetAtt": [
+                                                            "MappingBucket",
+                                                            "Arn"
+                                                        ]
+                                                    },
+                                                    "/*"
+                                                ]
+                                            ]
+                                        },
+                                        "arn:aws:s3:::mensa-github-sync/*"
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Project",
+                        "Value": "Mensa RnR"
+                    },
+                    {
+                        "Key": "Env",
+                        "Value": {
+                            "Ref": "Env"
+                        }
+                    },
+                    {
+                        "Key": "Owner",
+                        "Value": {
+                            "Ref": "Username"
+                        }
+                    }
+                ]
+            }
+        },
+        "MappingGlueJob": {
+            "Type": "AWS::Glue::Job",
+            "Properties": {
+                "Role": {
+                    "Ref": "MappingGlueRole"
+                },
+                "Description": "ETL Job to clean data from RawCategoryMappingBucket & RawSkuMappingBucket to write it back to MappingBucket",
+                "GlueVersion": "2.0",
+                "Command": {
+                    "Name": "glueetl",
+                    "ScriptLocation": {
+                        "Fn::If": [
+                            "IsProd",
+                            "s3://mensa-github-sync/brand-analytics/glue-scripts/mapping_etl.py",
+                            "s3://mensa-github-sync/brand-analytics-dev/glue-scripts/mapping_etl.py"
+                        ]
+                    }
+                },
+                "DefaultArguments": {
+                    "--job-bookmark-option": "job-bookmark-enable",
+                    "--enable-metrics": "",
+                    "--enable-continuous-cloudwatch-log": "true",
+                    "--enable-continuous-log-filter": "true",
+                    "--GLUE_DB": {
+                        "Ref": "RawMappingDB"
+                    },
+                    "--DEST_BUCKET": {
+                        "Ref": "MappingBucket"
+                    },
+                    "--GLUE_CATEGORY_TABLE": {
+                        "Ref": "RawCategoryMappingTable"
+                    },
+                    "--GLUE_SKU_TABLE": {
+                        "Ref": "RawSkuMappingTable"
+                    }
+                },
+                "ExecutionProperty": {
+                    "MaxConcurrentRuns": 1
+                },
+                "MaxRetries": 0,
+                "Name": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "rnr",
+                            "mappingjob",
+                            {
+                                "Fn::If": [
+                                    "IsDev",
+                                    {
+                                        "Fn::Join": [
+                                            "-",
+                                            [
+                                                {
+                                                    "Ref": "Env"
+                                                },
+                                                {
+                                                    "Ref": "Username"
+                                                }
+                                            ]
+                                        ]
+                                    },
+                                    {
+                                        "Ref": "Env"
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                },
+                "AllocatedCapacity": {
+                    "Fn::If": [
+                        "IsProd",
+                        "10",
+                        "10"
+                    ]
+                }
+            }
+        },
+        "MappingGlueWorkflow": {
+            "Type": "AWS::Glue::Workflow",
+            "Properties": {
+                "Description": "Workflow for orchestrating Mapping ETL Jobs",
+                "Name": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "rnr",
+                            "mappingglueworkflow",
+                            {
+                                "Fn::If": [
+                                    "IsDev",
+                                    {
+                                        "Fn::Join": [
+                                            "-",
+                                            [
+                                                {
+                                                    "Ref": "Env"
+                                                },
+                                                {
+                                                    "Ref": "Username"
+                                                }
+                                            ]
+                                        ]
+                                    },
+                                    {
+                                        "Ref": "Env"
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                }
+            }
+        },
+        "MappingCrawlerTrigger": {
+            "Type": "AWS::Glue::Trigger",
+            "Properties": {
+                "Name": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "rnr",
+                            "mapcrawlertrigger",
+                            {
+                                "Fn::If": [
+                                    "IsDev",
+                                    {
+                                        "Fn::Join": [
+                                            "-",
+                                            [
+                                                {
+                                                    "Ref": "Env"
+                                                },
+                                                {
+                                                    "Ref": "Username"
+                                                }
+                                            ]
+                                        ]
+                                    },
+                                    {
+                                        "Ref": "Env"
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                },
+                "Description": "Start crawler for Processed Parquet data upon completion of mapping etl job",
+                "Type": "CONDITIONAL",
+                "StartOnCreation": true,
+                "Predicate": {
+                    "Logical": "AND",
+                    "Conditions": [
+                        {
+                            "JobName": {
+                                "Ref": "MappingGlueJob"
+                            },
+                            "LogicalOperator": "EQUALS",
+                            "State": "SUCCEEDED"
+                        }
+                    ]
+                },
+                "Actions": [
+                    {
+                        "CrawlerName": {
+                            "Ref": "CleanMappingCrawler"
+                        }
+                    }
+                ],
+                "WorkflowName": {
+                    "Ref": "MappingGlueWorkflow"
+                }
+            }
+        },
+        "MappingGlueJobTrigger": {
+            "Type": "AWS::Glue::Trigger",
+            "Properties": {
+                "Name": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "rnr",
+                            "mapgluejobtrigger",
+                            {
+                                "Fn::If": [
+                                    "IsDev",
+                                    {
+                                        "Fn::Join": [
+                                            "-",
+                                            [
+                                                {
+                                                    "Ref": "Env"
+                                                },
+                                                {
+                                                    "Ref": "Username"
+                                                }
+                                            ]
+                                        ]
+                                    },
+                                    {
+                                        "Ref": "Env"
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                },
+                "Description": "Starts Mapping Glue Jobs on a Scheduled bases",
+                "Type": "SCHEDULED",
+                "Schedule": "cron(0 0 4 ? * * *)",
+                "StartOnCreation": true,
+                "Actions": [
+                    {
+                        "JobName": {
+                            "Ref": "MappingGlueJob"
+                        }
+                    }
+                ],
+                "WorkflowName": {
+                    "Ref": "MappingGlueWorkflow"
+                }
+            }
+        }
+    },
+    "Mappings": {},
+    "Conditions": {
+        "IsProd": {
+            "Fn::Equals": [
+                {
+                    "Ref": "Env"
+                },
+                "prod"
+            ]
+        },
+        "IsStage": {
+            "Fn::Equals": [
+                {
+                    "Ref": "Env"
+                },
+                "stage"
+            ]
+        },
+        "IsDev": {
+            "Fn::Equals": [
+                {
+                    "Ref": "Env"
+                },
+                "dev"
+            ]
+        },
+        "IsProdOrStage": {
+            "Fn::Or": [
+                {
+                    "Condition": "IsProd"
+                },
+                {
+                    "Condition": "IsStage"
+                }
+            ]
+        }
+    },
+    "Outputs": {
+        "RawCategoryMappingBucket": {
+            "Description": "Name of Subcategory Mapping S3 bucket",
+            "Value": {
+                "Ref": "RawCategoryMappingBucket"
+            }
+        },
+        "RawSkuMappingBucket": {
+            "Description": "Name of Brand Sku Mapping S3 bucket",
+            "Value": {
+                "Ref": "RawSkuMappingBucket"
+            }
+        },
+        "MappingBucket": {
+            "Description": "Name of Subcategory Mapping S3 bucket",
+            "Value": {
+                "Ref": "MappingBucket"
+            },
+            "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-MappingBucket" }}
+        },
+        "MappingBucketArn": {
+            "Description": "Name of Subcategory Mapping S3 bucket Arn",
+            "Value": {
+                "Fn::Join": [
+                    "",
+                    [
+                        {
+                            "Fn::GetAtt": [
+                                "MappingBucket",
+                                "Arn"
+                            ]
+                        },
+                        "/*"
+                    ]
+                ]
+            },
+            "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-MappingBucketArn" }}
+        },
+        "RawMappingDB": {
+            "Description": "Name of RawMappingDB",
+            "Value": {
+                "Ref": "RawMappingDB"
+            }
+        },
+        "CleanMappingDB": {
+            "Description": "Name of CleanMappingDB",
+            "Value": {
+                "Ref": "CleanMappingDB"
+            },
+            "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-MappingDB" }}
+        },
+        "RawCategoryMappingTable": {
+            "Description": "Name of RawCategoryMappingTable",
+            "Value": {
+                "Ref": "RawCategoryMappingTable"
+            }
+        },
+        "RawSkuMappingTable": {
+            "Description": "Name of RawSkuMappingTable",
+            "Value": {
+                "Ref": "RawSkuMappingTable"
+            }
+        },
+        "CategoryMappingTable": {
+            "Description": "Name of CategoryMappingTable",
+            "Value": "category",
+            "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-CategoryMappingTable" }}
+        },
+        "SkuMappingTable": {
+            "Description": "Name of SkuMappingTable",
+            "Value": "product",
+            "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-SkuMappingTable" }}
+        },
+        "MappingGlueJob": {
+            "Description": "Name of MappingGlueJob",
+            "Value": {
+                "Ref": "MappingGlueJob"
+            }
+        }
+    }
+}

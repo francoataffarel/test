@@ -1,0 +1,99 @@
+{
+  "id": "/rnr-review-schema",
+  "type": "object",
+  "description": "Review schema for tests",
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sku": {
+      "type": "string",
+      "minLength": 1
+    },
+    "brand": {
+      "type": "string",
+      "minLength": 1
+    },
+    "author": {
+      "type": "string",
+      "minLength": 1
+    },
+    "star": {
+      "type": "string",
+      "enum": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "1.0",
+        "2.0",
+        "3.0",
+        "4.0",
+        "5.0"
+      ]
+    },
+    "description": {
+      "type": "string",
+      "minLength": 0
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "aspects": {
+      "type": "string",
+      "minLength": 1
+    },
+    "date": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 8
+    },
+    "type": {
+      "type": "boolean"
+    },
+    "channel": {
+      "type": "string",
+      "enum": [
+        "Amazon IN",
+        "Amazon COM",
+        "Amazon CA",
+        "Amazon AE",
+        "Flipkart",
+        "Myntra",
+        "Nykaa",
+        "Nykaa Fashion"
+      ]
+    },
+    "extracted_date": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 8
+    },
+    "category": {
+      "type": "string",
+      "minLength": 1
+    },
+    "upvotes": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "id",
+    "sku",
+    "brand",
+    "author",
+    "star",
+    "description",
+    "title",
+    "aspects",
+    "date",
+    "verified",
+    "channel",
+    "extracted_date",
+    "category",
+    "upvotes"
+  ]
+}

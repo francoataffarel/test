@@ -1,0 +1,2 @@
+scrapydweb
+PyYAML==5.3.1
