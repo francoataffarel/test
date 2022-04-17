@@ -45,11 +45,12 @@ if __name__ == "__main__":
     #############################################
     if 'ALL_FILES' in changed_files:
         projects = ['.github/mensa-scraper/rnr/rnr/spiders/marketplace']
-        print("projects",projects,os.system("pwd && ls -al"))
+        print("projects",projects)
         changed_files = []
         for project in projects:
             all_files = [str(file) for file in list(pathlib.Path(project).glob('*.py'))]
             changed_files = changed_files + all_files
+        print("changed_files",changed_files)
     
     for i in range(len(changed_files)):
         file_name = changed_files[i].split("/")
