@@ -44,7 +44,7 @@ if __name__ == "__main__":
     # Fetch Jobs
     #############################################
     if 'ALL_FILES' in changed_files:
-        projects = ['./mensa-scraper/rnr/rnr/spiders/marketplace']
+        projects = ['.github/mensa-scraper/rnr/rnr/spiders/marketplace']
         print("projects",projects,os.system("pwd && ls -al"))
         changed_files = []
         for project in projects:
