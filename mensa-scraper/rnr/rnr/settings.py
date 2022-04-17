@@ -63,7 +63,7 @@ S3_PRODUCT_URL = config('S3_PRODUCT_URL', None)
 S3_REVIEW_URL = config('S3_REVIEW_URL', None)
 ITEM_PIPELINES = {'rnr.pipelines.S3Pipeline': 100} if S3_PRODUCT_URL else {}
 
-STATS_CLASS = 'rnr.collector.CloudWatchStatsCollector'
+# STATS_CLASS = 'rnr.collector.CloudWatchStatsCollector'
 
 # HTTPCACHE_ENABLED = True
 # HTTPCACHE_EXPIRATION_SECS = 3600
